@@ -1,167 +1,67 @@
-# user_manager.py
-
 import sqlite3
 import uuid
 import bcrypt
-from datetime import datetime
+import os
 
-DB_FILE = "backend/DataBase/database.db"
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'DataBase', 'database.db'))
 
-
-def get_user_by_email(email):
-    """
-    Retrieves user details by their unique email.
-    This is essential for the login process.
-    """
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        conn.row_factory = sqlite3.Row 
-        cursor = conn.cursor()
-        
-        sql = "SELECT user_id, email, full_name, role FROM Users WHERE email = ?;"
-        cursor.execute(sql, (email,))
-        
-        user_row = cursor.fetchone()
-        
-        return dict(user_row) if user_row else None
-            
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return None
-    finally:
-        if conn:
-            conn.close()
-
+def get_db_connection():
+    """Creates a database connection."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def create_user(email, password, full_name, role):
-    # Creates a new user with a hashed password
+    """Creates a new user in the database."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    user_id = str(uuid.uuid4())
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
     try:
-        user_id = str(uuid.uuid4())
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        sql = """
-        INSERT INTO Users (user_id, email, hashed_password, full_name, role)
-        VALUES (?, ?, ?, ?, ?);
-        """
-        cursor.execute(sql, (user_id, email, hashed_password.decode('utf-8'), full_name, role))
+        cursor.execute(
+            "INSERT INTO Users (user_id, email, hashed_password, full_name, role) VALUES (?, ?, ?, ?, ?)",
+            (user_id, email, hashed_password, full_name, role)
+        )
         conn.commit()
-        print(f"User '{full_name}' created successfully with ID: {user_id}")
         return user_id
     except sqlite3.IntegrityError:
-        print(f"Error: A user with the email '{email}' already exists.")
-        return None
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return None
+        return None  # User with this email already exists
     finally:
-        if conn:
-            conn.close()
+        conn.close()
 
+def find_user_by_email(email):
+    """Finds a user by their email address."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
 
-def get_user_by_id(user_id):
-    # Retrieves user details by ID and formats timestamp
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        conn.row_factory = sqlite3.Row 
-        cursor = conn.cursor()
-        sql = "SELECT user_id, email, full_name, role, created_at FROM Users WHERE user_id = ?;"
-        cursor.execute(sql, (user_id,))
-        user_row = cursor.fetchone()
-        if user_row:
-            user_dict = dict(user_row)
-            ts_from_db = datetime.strptime(user_dict['created_at'], '%Y-%m-%d %H:%M:%S')
-            user_dict['created_at_formatted'] = ts_from_db.strftime('%B %d, %Y at %I:%M %p')
-            return user_dict
-        else:
-            return None
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return None
-    finally:
-        if conn:
-            conn.close()
+def find_user_by_id(user_id):
+    """Finds a user by their user ID."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id, email, full_name, role, created_at FROM Users WHERE user_id = ?", (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
 
+def verify_password(stored_hash, provided_password):
+    """Verifies a password against a stored hash."""
+    return bcrypt.checkpw(provided_password.encode('utf-8'), stored_hash)
 
-def update_user(user_id, full_name=None, password=None):
-    # Updates user's name and/or password
-    if not full_name and not password:
-        print("No update information provided.")
-        return False
-
-    updates, params = [], []
-    if full_name:
-        updates.append("full_name = ?")
-        params.append(full_name)
-    if password:
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        updates.append("hashed_password = ?")
-        params.append(hashed_password.decode('utf-8'))
-    params.append(user_id)
-
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        sql = f"UPDATE Users SET {', '.join(updates)} WHERE user_id = ?;"
-        cursor.execute(sql, tuple(params))
-        updated_rows = cursor.rowcount
-        conn.commit()
-        if updated_rows > 0:
-            print(f"User {user_id} updated successfully.")
-            return True
-        else:
-            print(f"User {user_id} not found or no changes made.")
-            return False
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return False
-    finally:
-        if conn:
-            conn.close()
-
-
-def delete_user(user_id):
-    # Deletes user and related records via cascade
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute("PRAGMA foreign_keys = ON;")
-        sql = "DELETE FROM Users WHERE user_id = ?;"
-        cursor.execute(sql, (user_id,))
-        deleted_rows = cursor.rowcount
-        conn.commit()
-        if deleted_rows > 0:
-            print(f"User {user_id} and all associated permissions deleted successfully.")
-            return True
-        else:
-            print(f"User {user_id} not found.")
-            return False
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return False
-    finally:
-        if conn:
-            conn.close()
-
-
-def verify_user_password(email, password):
-    # Verifies user password during login
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        sql = "SELECT hashed_password FROM Users WHERE email = ?;"
-        cursor.execute(sql, (email,))
-        result = cursor.fetchone()
-        if result:
-            stored_hash = result[0].encode('utf-8')
-            if bcrypt.checkpw(password.encode('utf-8'), stored_hash):
-                return True
-        return False
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return False
-    finally:
-        if conn:
-            conn.close()
-
-
+def search_users_by_email(email_query):
+    """Finds users by a partial email match."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Using LIKE for a partial match, and limiting results
+    cursor.execute(
+        "SELECT user_id, email, full_name FROM Users WHERE email LIKE ? LIMIT 10", 
+        (f'%{email_query}%',)
+    )
+    users = cursor.fetchall()
+    conn.close()
+    return users

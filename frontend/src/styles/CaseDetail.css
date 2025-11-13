@@ -1,0 +1,139 @@
+.case-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.case-detail-header h1 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.case-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.main-content, .sidebar-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.card h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+/* Document List */
+.document-list {
+    list-style: none;
+    padding: 0;
+}
+
+.document-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.document-list li:last-child {
+    border-bottom: none;
+}
+
+.document-list a {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Upload Form */
+.upload-form {
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Status Update */
+.status-update-form {
+    display: flex;
+    gap: 1rem;
+}
+
+.status-update-form select {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Collaborator List */
+.collaborator-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.collaborator-list span {
+    font-size: 0.8rem;
+    background-color: #eee;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Access Management */
+.access-form {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.search-results {
+    list-style: none;
+    padding: 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
+.search-results li {
+    padding: 0.75rem;
+    cursor: pointer;
+}
+
+.search-results li:hover {
+    background-color: #f0f2f5;
+}
+
+.grant-access-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.grant-access-section button {
+    margin-right: 0.5rem;
+}
+
+.error-message {
+    color: #d93025;
+    margin-top: 1rem;
+}
