@@ -4,6 +4,61 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import '../styles/CaseDetail.css';
 
+// Drag and Drop component
+const FileDropzone = ({ onFileChange, onUpload, selectedFile }) => {
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            onFileChange(e.dataTransfer.files[0]);
+            e.dataTransfer.clearData();
+        }
+    };
+
+    return (
+        <div 
+            className={`dropzone ${isDragging ? 'dragging' : ''}`}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+        >
+            <input 
+                type="file" 
+                id="file-upload" 
+                style={{display: 'none'}} 
+                onChange={(e) => onFileChange(e.target.files[0])} 
+            />
+            <label htmlFor="file-upload" className="dropzone-label">
+                {selectedFile 
+                    ? `Selected: ${selectedFile.name}`
+                    : "Drag & drop files here, or click to select"}
+            </label>
+            <button onClick={onUpload} disabled={!selectedFile} className="upload-button">
+                Upload File
+            </button>
+        </div>
+    );
+};
+
+
 const CaseDetailPage = () => {
     const { caseId } = useParams();
     const { user } = useUser();
@@ -13,7 +68,6 @@ const CaseDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // New state for features
     const [status, setStatus] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadError, setUploadError] = useState('');
@@ -35,7 +89,6 @@ const CaseDetailPage = () => {
             setPermissions(permsRes.data);
             setStatus(caseRes.data.status);
         } catch (err) {
-            console.error("Error fetching case data:", err);
             setError(err.response?.data?.error || 'Failed to load case data.');
         } finally {
             setLoading(false);
@@ -46,17 +99,14 @@ const CaseDetailPage = () => {
         fetchData();
     }, [fetchData]);
 
-    const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
-
-    const handleUpload = async (e) => {
-        e.preventDefault();
+    const handleUpload = async () => {
         if (!selectedFile) return;
         const formData = new FormData();
         formData.append('file', selectedFile);
         try {
             await axios.post(`/api/case/${caseId}/upload`, formData);
             setSelectedFile(null);
-            fetchData(); // Refresh data
+            fetchData();
         } catch (err) {
             setUploadError(err.response?.data?.error || 'File upload failed.');
         }
@@ -65,7 +115,7 @@ const CaseDetailPage = () => {
     const handleStatusUpdate = async () => {
         try {
             await axios.put(`/api/case/${caseId}/status`, { status });
-            fetchData(); // Refresh data
+            fetchData();
         } catch (err) {
             console.error("Error updating status:", err);
         }
@@ -88,8 +138,7 @@ const CaseDetailPage = () => {
                 user_id: selectedUser.user_id,
                 access_level: accessLevel,
             });
-            fetchData(); // Refresh data
-            // Reset form
+            fetchData();
             setSearchEmail('');
             setSearchResults([]);
             setSelectedUser(null);
@@ -106,21 +155,19 @@ const CaseDetailPage = () => {
     return (
         <div className="case-detail-container">
             <div className="case-detail-header">
-                <h1>Case: {caseDetails.case_name}</h1>
-                <Link to="/dashboard">Back to Dashboard</Link>
+                <h1>{caseDetails.case_name}</h1>
             </div>
 
             <div className="case-grid">
                 <div className="main-content">
                     <section className="card">
                         <h2>Documents</h2>
-                        <div className="upload-form">
-                            <input type="file" onChange={handleFileChange} />
-                            <button onClick={handleUpload} disabled={!selectedFile}>
-                                {selectedFile ? `Upload ${selectedFile.name}` : 'Upload File'}
-                            </button>
-                            {uploadError && <p className="error-message">{uploadError}</p>}
-                        </div>
+                        <FileDropzone 
+                            onFileChange={setSelectedFile}
+                            onUpload={handleUpload}
+                            selectedFile={selectedFile}
+                        />
+                        {uploadError && <p className="error-message">{uploadError}</p>}
                         <ul className="document-list">
                             {documents.map(doc => (
                                 <li key={doc.doc_id}>
@@ -154,7 +201,10 @@ const CaseDetailPage = () => {
                         <ul className="collaborator-list">
                             {permissions.map(p => (
                                 <li key={p.user_id}>
-                                    <strong>{p.full_name}</strong> ({p.email})
+                                    <div>
+                                        <strong>{p.full_name}</strong>
+                                        <small>{p.email}</small>
+                                    </div>
                                     <span>{p.access_level}</span>
                                 </li>
                             ))}
@@ -189,8 +239,9 @@ const CaseDetailPage = () => {
                             {selectedUser && (
                                 <div className="grant-access-section">
                                     <p>Grant access to <strong>{selectedUser.full_name}</strong>:</p>
-                                    <button onClick={() => handleGrantAccess('view_only')}>Grant View Access</button>
-                                    <button onClick={() => handleGrantAccess('sudo')}>Grant Sudo Access</button>
+                                    <button onClick={() => handleGrantAccess('view_only')}>View Only</button>
+                                    <button onClick={() => handleGrantAccess('upload_only')}>Upload Only</button>
+                                    <button onClick={() => handleGrantAccess('sudo')}>Full Control (Sudo)</button>
                                 </div>
                             )}
                             {accessError && <p className="error-message">{accessError}</p>}

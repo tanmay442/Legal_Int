@@ -203,7 +203,7 @@ def grant_case_access(case_id):
     if not target_user_id:
         return jsonify({"error": "User ID is required"}), 400
     
-    if target_access_level not in ['view_only', 'sudo']:
+    if target_access_level not in ['view_only', 'sudo', 'upload_only']:
         return jsonify({"error": "Invalid access level"}), 400
 
     if permissions_manager.grant_access(case_id, target_user_id, target_access_level):
@@ -229,9 +229,10 @@ def get_documents(case_id):
 def upload_document(case_id):
     user_id = session.get('user_id')
     user_role = session.get('role')
+    access_level = permissions_manager.get_user_access_level(case_id, user_id)
 
-    # Check if user has access to the case
-    if user_role != 'judge' and not permissions_manager.check_access(case_id, user_id):
+    # Check if user has permission to upload
+    if user_role != 'judge' and access_level not in ['sudo', 'upload_only']:
         return jsonify({"error": "You do not have permission to upload to this case"}), 403
 
     if 'file' not in request.files:

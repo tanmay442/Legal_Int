@@ -46,7 +46,7 @@ const RegisterPage = () => {
     return (
         <div className="auth-container">
             <div className="auth-form">
-                <h2>Register for JusticeLink</h2>
+                <h2>Register for Legal_Int</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="fullName">Full Name</label>

@@ -1,19 +1,18 @@
 .case-detail-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 2rem;
 }
 
 .case-detail-header h1 {
     font-size: 2.5rem;
     margin: 0;
+    color: var(--color-text-primary);
 }
 
 .case-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 2rem;
+    align-items: start;
 }
 
 .main-content, .sidebar-content {
@@ -22,33 +21,19 @@
     gap: 2rem;
 }
 
-.card {
-    background: #ffffff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-
-.card h2 {
-    margin-top: 0;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-}
-
 /* Document List */
 .document-list {
     list-style: none;
     padding: 0;
+    margin-top: 1.5rem;
 }
 
 .document-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f1f1f1;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .document-list li:last-child {
@@ -57,45 +42,77 @@
 
 .document-list a {
     font-size: 0.9rem;
-    padding: 0.3rem 0.8rem;
+    padding: 0.4rem 0.8rem;
     border-radius: 6px;
-    background-color: #007bff;
-    color: #fff;
+    background-color: var(--color-accent);
+    color: var(--color-text-primary);
     text-decoration: none;
+    font-weight: 500;
 }
 
-/* Upload Form */
-.upload-form {
-    margin-bottom: 1.5rem;
-    display: flex;
-    gap: 1rem;
+/* Dropzone */
+.dropzone {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dropzone.dragging {
+    border-color: var(--color-primary);
+    background-color: #fcfaf7;
+}
+
+.dropzone-label {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.upload-button {
+    background-color: var(--color-primary);
+    color: var(--color-surface);
 }
 
 /* Status Update */
 .status-update-form {
     display: flex;
     gap: 1rem;
-}
-
-.status-update-form select {
-    flex-grow: 1;
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    margin-top: 1rem;
 }
 
 /* Collaborator List */
+.collaborator-list {
+    list-style: none;
+    padding: 0;
+}
 .collaborator-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border);
 }
-
+.collaborator-list li:last-child {
+    border-bottom: none;
+}
+.collaborator-list strong {
+    color: var(--color-text-primary);
+}
+.collaborator-list small {
+    display: block;
+    color: var(--color-text-secondary);
+}
 .collaborator-list span {
     font-size: 0.8rem;
-    background-color: #eee;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    background-color: var(--color-background);
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
 }
 
 /* Access Management */
@@ -108,10 +125,11 @@
 .search-results {
     list-style: none;
     padding: 0;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
-    margin-top: -1rem;
+    margin-top: -0.5rem;
     margin-bottom: 1rem;
+    overflow: hidden;
 }
 
 .search-results li {
@@ -120,20 +138,27 @@
 }
 
 .search-results li:hover {
-    background-color: #f0f2f5;
+    background-color: var(--color-background);
 }
 
 .grant-access-section {
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--color-border);
 }
-
+.grant-access-section p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+}
 .grant-access-section button {
     margin-right: 0.5rem;
+    background-color: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
 }
-
-.error-message {
-    color: #d93025;
-    margin-top: 1rem;
+.grant-access-section button:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
 }
