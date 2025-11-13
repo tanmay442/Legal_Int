@@ -7,6 +7,32 @@ from datetime import datetime
 
 DB_FILE = "backend/DataBase/database.db"
 
+
+def get_user_by_email(email):
+    """
+    Retrieves user details by their unique email.
+    This is essential for the login process.
+    """
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        conn.row_factory = sqlite3.Row 
+        cursor = conn.cursor()
+        
+        sql = "SELECT user_id, email, full_name, role FROM Users WHERE email = ?;"
+        cursor.execute(sql, (email,))
+        
+        user_row = cursor.fetchone()
+        
+        return dict(user_row) if user_row else None
+            
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        if conn:
+            conn.close()
+
+
 def create_user(email, password, full_name, role):
     # Creates a new user with a hashed password
     try:
