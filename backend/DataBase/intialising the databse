@@ -56,6 +56,19 @@ def create_database():
         );
         """
 
+
+        #---Case Acesss Permissions Table ------
+        sql_create_Acess_table = """
+        CREATE TABLE IF NOT EXISTS CaseAccessPermissions (
+            case_id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            access_level TEXT NOT NULL,
+            FOREIGN KEY (case_id) REFERENCES Cases (case_id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES Users (user_id) ON DELETE CASCADE,
+            UNIQUE (case_id, user_id)
+        );
+        """
+
         #-----NOT USING ATM FOR THE SAKE OF SIMPLICITY AND FAST PROTOTYPING-----
         # --- SQL statement for DocumentPermissions table ---
         # INTEGER PRIMARY KEY AUTOINCREMENT is the standard SQLite way for an auto-incrementing ID.
