@@ -3,6 +3,7 @@
 import sqlite3
 import uuid
 from datetime import datetime
+from backend.DataBase.database_init import create_case_access_permissions_table
 
 DB_FILE = "backend/DataBase/database.db"
 
@@ -22,6 +23,14 @@ def create_case(case_name, creator_id):
         VALUES (?, ?, ?, ?, ?);
         """
         cursor.execute(sql, (case_id, case_name, creator_id, status, created_at_timestamp))
+
+        # Use the imported function to create the case-specific access permissions table
+        create_case_access_permissions_table(conn, case_id)
+
+        # Add the creator as a sudo user
+        table_name = f"CaseAccessPermissions_{case_id}"
+        cursor.execute(f"INSERT INTO {table_name} (case_id, user_id, access_level) VALUES (?, ?, ?);", (case_id, creator_id, 'sudo'))
+
         conn.commit()
         print(f"Case '{case_name}' created successfully with ID: {case_id}")
         return case_id

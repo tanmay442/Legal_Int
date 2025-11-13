@@ -35,7 +35,7 @@ def create_cases_table(conn):
         );
     """)
     print("Cases table ready.")
-
+  
 
 def create_documents_table(conn,case_id_for_naming):
     cursor = conn.cursor()
@@ -77,6 +77,9 @@ def create_case_access_permissions_table(conn,case_id_for_naming):
         );
     """)
     print("CaseAccessPermissions table ready.")
+# When creating a new case, a corresponding case access table should also be created.
+# This table will manage access levels for users, with the creator having 'sudo' access by default.
+# Other access levels include 'none' and 'view_only'.
 
 
 
